@@ -10,8 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ent/ent/entc/integration/ulid/ent/predicate"
-	"github.com/ent/ent/entc/integration/ulid/ent/user"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/predicate"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/schema"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/user"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -24,6 +25,12 @@ type UserUpdate struct {
 // Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.Where(ps...)
+	return uu
+}
+
+// SetOccupancyPricing sets the "occupancy_pricing" field.
+func (uu *UserUpdate) SetOccupancyPricing(mp map[string]schema.OccupancyPricing) *UserUpdate {
+	uu.mutation.SetOccupancyPricing(mp)
 	return uu
 }
 
@@ -92,7 +99,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
@@ -103,6 +110,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := uu.mutation.OccupancyPricing(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldOccupancyPricing,
+		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -121,6 +135,12 @@ type UserUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
+}
+
+// SetOccupancyPricing sets the "occupancy_pricing" field.
+func (uuo *UserUpdateOne) SetOccupancyPricing(mp map[string]schema.OccupancyPricing) *UserUpdateOne {
+	uuo.mutation.SetOccupancyPricing(mp)
+	return uuo
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -201,7 +221,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
@@ -229,6 +249,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := uuo.mutation.OccupancyPricing(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldOccupancyPricing,
+		})
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

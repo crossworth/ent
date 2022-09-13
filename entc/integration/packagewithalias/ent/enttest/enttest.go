@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/ent/ent/entc/integration/ulid/ent"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent"
 	// required by schema hooks.
-	_ "github.com/ent/ent/entc/integration/ulid/ent/runtime"
+	_ "github.com/ent/ent/entc/integration/packagewithalias/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/ent/ent/entc/integration/ulid/ent/migrate"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/migrate"
 )
 
 type (

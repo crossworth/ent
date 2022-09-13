@@ -2,15 +2,13 @@
 
 package user
 
-import (
-	ulid "github.com/oklog/ulid/v2"
-)
-
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldOccupancyPricing holds the string denoting the occupancy_pricing field in the database.
+	FieldOccupancyPricing = "occupancy_pricing"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -18,6 +16,7 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldOccupancyPricing,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -29,8 +28,3 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
-
-var (
-	// DefaultID holds the default value on creation for the "id" field.
-	DefaultID func() ulid.ULID
-)

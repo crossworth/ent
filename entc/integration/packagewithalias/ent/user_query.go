@@ -10,9 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ent/ent/entc/integration/ulid/ent/predicate"
-	"github.com/ent/ent/entc/integration/ulid/ent/user"
-	ulid "github.com/oklog/ulid/v2"
+	pkg "github.com/ent/ent/entc/integration/pacakgewithalias/pkg/v2"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/predicate"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/user"
 )
 
 // UserQuery is the builder for querying User entities.
@@ -84,8 +84,8 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 
 // FirstID returns the first User ID from the query.
 // Returns a *NotFoundError when no User ID was found.
-func (uq *UserQuery) FirstID(ctx context.Context) (id ulid.ULID, err error) {
-	var ids []ulid.ULID
+func (uq *UserQuery) FirstID(ctx context.Context) (id pkg.SomeInt, err error) {
+	var ids []pkg.SomeInt
 	if ids, err = uq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -97,7 +97,7 @@ func (uq *UserQuery) FirstID(ctx context.Context) (id ulid.ULID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (uq *UserQuery) FirstIDX(ctx context.Context) ulid.ULID {
+func (uq *UserQuery) FirstIDX(ctx context.Context) pkg.SomeInt {
 	id, err := uq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -135,8 +135,8 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 // OnlyID is like Only, but returns the only User ID in the query.
 // Returns a *NotSingularError when more than one User ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (uq *UserQuery) OnlyID(ctx context.Context) (id ulid.ULID, err error) {
-	var ids []ulid.ULID
+func (uq *UserQuery) OnlyID(ctx context.Context) (id pkg.SomeInt, err error) {
+	var ids []pkg.SomeInt
 	if ids, err = uq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -152,7 +152,7 @@ func (uq *UserQuery) OnlyID(ctx context.Context) (id ulid.ULID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (uq *UserQuery) OnlyIDX(ctx context.Context) ulid.ULID {
+func (uq *UserQuery) OnlyIDX(ctx context.Context) pkg.SomeInt {
 	id, err := uq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -178,8 +178,8 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 }
 
 // IDs executes the query and returns a list of User IDs.
-func (uq *UserQuery) IDs(ctx context.Context) ([]ulid.ULID, error) {
-	var ids []ulid.ULID
+func (uq *UserQuery) IDs(ctx context.Context) ([]pkg.SomeInt, error) {
+	var ids []pkg.SomeInt
 	if err := uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -187,7 +187,7 @@ func (uq *UserQuery) IDs(ctx context.Context) ([]ulid.ULID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (uq *UserQuery) IDsX(ctx context.Context) []ulid.ULID {
+func (uq *UserQuery) IDsX(ctx context.Context) []pkg.SomeInt {
 	ids, err := uq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -250,6 +250,18 @@ func (uq *UserQuery) Clone() *UserQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		OccupancyPricing map[string]schema.OccupancyPricing `json:"occupancy_pricing,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.User.Query().
+//		GroupBy(user.FieldOccupancyPricing).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	grbuild := &UserGroupBy{config: uq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -266,6 +278,16 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		OccupancyPricing map[string]schema.OccupancyPricing `json:"occupancy_pricing,omitempty"`
+//	}
+//
+//	client.User.Query().
+//		Select(user.FieldOccupancyPricing).
+//		Scan(ctx, &v)
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
 	uq.fields = append(uq.fields, fields...)
 	selbuild := &UserSelect{UserQuery: uq}
@@ -341,7 +363,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},

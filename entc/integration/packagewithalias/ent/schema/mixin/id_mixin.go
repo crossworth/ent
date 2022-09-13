@@ -4,7 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
-	"github.com/oklog/ulid/v2"
+	"github.com/ent/ent/entc/integration/pacakgewithalias/pkg/v2"
 )
 
 type IDMixin struct {
@@ -13,6 +13,6 @@ type IDMixin struct {
 
 func (IDMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", ulid.ULID{}).Default(ulid.Make),
+		field.Int("id").GoType(pkg.SomeInt(0)),
 	}
 }

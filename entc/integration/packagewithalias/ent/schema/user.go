@@ -3,7 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
-	"github.com/ent/ent/entc/integration/ulid/ent/schema/mixin"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/schema/mixin"
 )
 
 type OccupancyPricing struct {

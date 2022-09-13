@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ent/ent/entc/integration/ulid/ent/predicate"
-	"github.com/ent/ent/entc/integration/ulid/ent/user"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/predicate"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/user"
 )
 
 // UserDelete is the builder for deleting a User entity.
@@ -72,7 +72,7 @@ func (ud *UserDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: user.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},

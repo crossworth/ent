@@ -1,8 +1,11 @@
-module github.com/ent/ent/entc/integration/ulid
+module github.com/ent/ent/entc/integration/packagewithalias
 
 go 1.18
 
-require entgo.io/ent v0.11.2
+require (
+	entgo.io/ent v0.11.2
+	github.com/ent/ent/entc/integration/pacakgewithalias/pkg/v2 v2.0.0-00010101000000-000000000000
+)
 
 require (
 	ariga.io/atlas v0.6.5-0.20220907173155-3332f3c1b8c9 // indirect
@@ -13,7 +16,6 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
-	github.com/oklog/ulid/v2 v2.1.0
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
@@ -22,3 +24,5 @@ require (
 )
 
 replace entgo.io/ent => ../../../
+
+replace github.com/ent/ent/entc/integration/pacakgewithalias/pkg/v2 => ./pkg

@@ -3,18 +3,23 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/ent/ent/entc/integration/ulid/ent/user"
-	ulid "github.com/oklog/ulid/v2"
+	"entgo.io/ent/dialect/sql"
+	pkg "github.com/ent/ent/entc/integration/pacakgewithalias/pkg/v2"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/schema"
+	"github.com/ent/ent/entc/integration/packagewithalias/ent/user"
 )
 
 // User is the model entity for the User schema.
 type User struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID ulid.ULID `json:"id,omitempty"`
+	ID pkg.SomeInt `json:"id,omitempty"`
+	// OccupancyPricing holds the value of the "occupancy_pricing" field.
+	OccupancyPricing map[string]schema.OccupancyPricing `json:"occupancy_pricing,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -22,8 +27,10 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case user.FieldOccupancyPricing:
+			values[i] = new([]byte)
 		case user.FieldID:
-			values[i] = new(ulid.ULID)
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -40,10 +47,18 @@ func (u *User) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case user.FieldID:
-			if value, ok := values[i].(*ulid.ULID); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				u.ID = *value
+			} else if value.Valid {
+				u.ID = pkg.SomeInt(value.Int64)
+			}
+		case user.FieldOccupancyPricing:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field occupancy_pricing", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.OccupancyPricing); err != nil {
+					return fmt.Errorf("unmarshal field occupancy_pricing: %w", err)
+				}
 			}
 		}
 	}
@@ -72,7 +87,9 @@ func (u *User) Unwrap() *User {
 func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString("occupancy_pricing=")
+	builder.WriteString(fmt.Sprintf("%v", u.OccupancyPricing))
 	builder.WriteByte(')')
 	return builder.String()
 }
