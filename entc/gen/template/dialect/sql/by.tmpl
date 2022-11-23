@@ -24,7 +24,8 @@ func columnChecker(table string) func(string) error {
 		}
 	}
 	return func(column string) error {
-		if !check(column) {
+		n, _ := strconv.ParseInt(column, 10, 32)
+		if !check(column) && n < 1 {
 			return fmt.Errorf("unknown column %q for table %q", column, table)
 		}
 		return nil
@@ -40,7 +41,12 @@ func columnChecker(table string) func(string) error {
 			if err := check(f); err != nil {
 				s.AddError(&ValidationError{Name: f, err: fmt.Errorf("{{ base $.Config.Package }}: %w", err)})
 			}
-			s.OrderBy(sql.{{ $f }}(s.C(f)))
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				s.OrderBy(sql.{{ $f }}(f))
+			} else {
+				s.OrderBy(sql.{{ $f }}(s.C(f)))
+			}
 		}
 	}
 {{- end }}
