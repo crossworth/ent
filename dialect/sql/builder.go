@@ -2056,6 +2056,9 @@ func (s *SelectTable) As(alias string) *SelectTable {
 
 // C returns a formatted string for the table column.
 func (s *SelectTable) C(column string) string {
+	if isInt(column) {
+		return column
+	}
 	name := s.name
 	if s.as != "" {
 		name = s.as
@@ -3191,7 +3194,7 @@ func (b *Builder) Quote(ident string) string {
 func (b *Builder) Ident(s string) *Builder {
 	switch {
 	case len(s) == 0:
-	case !strings.HasSuffix(s, "*") && !b.isIdent(s) && !isFunc(s) && !isModifier(s):
+	case !strings.HasSuffix(s, "*") && !b.isIdent(s) && !isFunc(s) && !isModifier(s) && !isInt(s):
 		if b.qualifier != "" {
 			b.WriteString(b.Quote(b.qualifier)).WriteByte('.')
 		}
@@ -3742,4 +3745,9 @@ func isModifier(s string) bool {
 		}
 	}
 	return false
+}
+
+func isInt(s string) bool {
+	_, err := strconv.ParseInt(s, 10, 64)
+	return err == nil
 }

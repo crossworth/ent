@@ -1266,6 +1266,14 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `SELECT "name", COUNT(*) FROM "users" GROUP BY "name" ORDER BY "name"`,
 		},
 		{
+			input: Dialect(dialect.Postgres).
+				Select("name", Count("*")).
+				From(Table("users")).
+				GroupBy("1").
+				OrderBy("1"),
+			wantQuery: `SELECT "name", COUNT(*) FROM "users" GROUP BY 1 ORDER BY 1`,
+		},
+		{
 			input: Select("name", "age", Count("*")).
 				From(Table("users")).
 				GroupBy("name", "age").
@@ -1315,6 +1323,14 @@ func TestBuilder(t *testing.T) {
 				Distinct().
 				OrderBy("name"),
 			wantQuery: `SELECT DISTINCT "age", "name" FROM "users" ORDER BY "name"`,
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("age", "name").
+				From(Table("users")).
+				Distinct().
+				OrderBy("1"),
+			wantQuery: `SELECT DISTINCT "age", "name" FROM "users" ORDER BY 1`,
 		},
 		{
 			input:     Select("age").From(Table("users")).Where(EQ("name", "foo")).Or().Where(EQ("name", "bar")),
