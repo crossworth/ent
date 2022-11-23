@@ -11,6 +11,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -734,7 +735,8 @@ func (dgb *DocGroupBy) Scan(ctx context.Context, v any) error {
 
 func (dgb *DocGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range dgb.fields {
-		if !doc.ValidColumn(f) {
+		n, _ := strconv.ParseInt(f, 10, 32)
+		if !doc.ValidColumn(f) && n < 1 {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -760,6 +762,10 @@ func (dgb *DocGroupBy) sqlQuery() *sql.Selector {
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(dgb.fields)+len(dgb.fns))
 		for _, f := range dgb.fields {
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				continue
+			}
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)

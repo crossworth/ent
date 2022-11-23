@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -617,7 +618,8 @@ func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v any) error {
 
 func (ttgb *TweetTagGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ttgb.fields {
-		if !tweettag.ValidColumn(f) {
+		n, _ := strconv.ParseInt(f, 10, 32)
+		if !tweettag.ValidColumn(f) && n < 1 {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -643,6 +645,10 @@ func (ttgb *TweetTagGroupBy) sqlQuery() *sql.Selector {
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ttgb.fields)+len(ttgb.fns))
 		for _, f := range ttgb.fields {
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				continue
+			}
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)

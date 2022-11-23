@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -474,7 +475,8 @@ func (mgb *MediaGroupBy) Scan(ctx context.Context, v any) error {
 
 func (mgb *MediaGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range mgb.fields {
-		if !media.ValidColumn(f) {
+		n, _ := strconv.ParseInt(f, 10, 32)
+		if !media.ValidColumn(f) && n < 1 {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -500,6 +502,10 @@ func (mgb *MediaGroupBy) sqlQuery() *sql.Selector {
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(mgb.fields)+len(mgb.fns))
 		for _, f := range mgb.fields {
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				continue
+			}
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)

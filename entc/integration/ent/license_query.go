@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -517,7 +518,8 @@ func (lgb *LicenseGroupBy) Scan(ctx context.Context, v any) error {
 
 func (lgb *LicenseGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range lgb.fields {
-		if !license.ValidColumn(f) {
+		n, _ := strconv.ParseInt(f, 10, 32)
+		if !license.ValidColumn(f) && n < 1 {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -543,6 +545,10 @@ func (lgb *LicenseGroupBy) sqlQuery() *sql.Selector {
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(lgb.fields)+len(lgb.fns))
 		for _, f := range lgb.fields {
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				continue
+			}
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)

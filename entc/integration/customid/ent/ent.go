@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -76,7 +77,8 @@ func columnChecker(table string) func(string) error {
 		}
 	}
 	return func(column string) error {
-		if !check(column) {
+		n, _ := strconv.ParseInt(column, 10, 32)
+		if !check(column) && n < 1 {
 			return fmt.Errorf("unknown column %q for table %q", column, table)
 		}
 		return nil
@@ -91,7 +93,12 @@ func Asc(fields ...string) OrderFunc {
 			if err := check(f); err != nil {
 				s.AddError(&ValidationError{Name: f, err: fmt.Errorf("ent: %w", err)})
 			}
-			s.OrderBy(sql.Asc(s.C(f)))
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				s.OrderBy(sql.Asc(f))
+			} else {
+				s.OrderBy(sql.Asc(s.C(f)))
+			}
 		}
 	}
 }
@@ -104,7 +111,12 @@ func Desc(fields ...string) OrderFunc {
 			if err := check(f); err != nil {
 				s.AddError(&ValidationError{Name: f, err: fmt.Errorf("ent: %w", err)})
 			}
-			s.OrderBy(sql.Desc(s.C(f)))
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				s.OrderBy(sql.Desc(f))
+			} else {
+				s.OrderBy(sql.Desc(s.C(f)))
+			}
 		}
 	}
 }

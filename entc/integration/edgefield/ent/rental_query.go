@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -617,7 +618,8 @@ func (rgb *RentalGroupBy) Scan(ctx context.Context, v any) error {
 
 func (rgb *RentalGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rgb.fields {
-		if !rental.ValidColumn(f) {
+		n, _ := strconv.ParseInt(f, 10, 32)
+		if !rental.ValidColumn(f) && n < 1 {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -643,6 +645,10 @@ func (rgb *RentalGroupBy) sqlQuery() *sql.Selector {
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(rgb.fields)+len(rgb.fns))
 		for _, f := range rgb.fields {
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				continue
+			}
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)

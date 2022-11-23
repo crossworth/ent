@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -475,7 +476,8 @@ func (migb *MixinIDGroupBy) Scan(ctx context.Context, v any) error {
 
 func (migb *MixinIDGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range migb.fields {
-		if !mixinid.ValidColumn(f) {
+		n, _ := strconv.ParseInt(f, 10, 32)
+		if !mixinid.ValidColumn(f) && n < 1 {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -501,6 +503,10 @@ func (migb *MixinIDGroupBy) sqlQuery() *sql.Selector {
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(migb.fields)+len(migb.fns))
 		for _, f := range migb.fields {
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				continue
+			}
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)

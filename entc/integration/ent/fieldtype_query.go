@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -522,7 +523,8 @@ func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v any) error {
 
 func (ftgb *FieldTypeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ftgb.fields {
-		if !fieldtype.ValidColumn(f) {
+		n, _ := strconv.ParseInt(f, 10, 32)
+		if !fieldtype.ValidColumn(f) && n < 1 {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -548,6 +550,10 @@ func (ftgb *FieldTypeGroupBy) sqlQuery() *sql.Selector {
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
 		for _, f := range ftgb.fields {
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				continue
+			}
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)

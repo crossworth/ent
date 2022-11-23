@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -616,7 +617,8 @@ func (uggb *UserGroupGroupBy) Scan(ctx context.Context, v any) error {
 
 func (uggb *UserGroupGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range uggb.fields {
-		if !usergroup.ValidColumn(f) {
+		n, _ := strconv.ParseInt(f, 10, 32)
+		if !usergroup.ValidColumn(f) && n < 1 {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -642,6 +644,10 @@ func (uggb *UserGroupGroupBy) sqlQuery() *sql.Selector {
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(uggb.fields)+len(uggb.fns))
 		for _, f := range uggb.fields {
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				continue
+			}
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)

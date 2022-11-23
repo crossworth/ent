@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -495,7 +496,8 @@ func (ggb *GoodsGroupBy) Scan(ctx context.Context, v any) error {
 
 func (ggb *GoodsGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ggb.fields {
-		if !goods.ValidColumn(f) {
+		n, _ := strconv.ParseInt(f, 10, 32)
+		if !goods.ValidColumn(f) && n < 1 {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -521,6 +523,10 @@ func (ggb *GoodsGroupBy) sqlQuery() *sql.Selector {
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
 		for _, f := range ggb.fields {
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				continue
+			}
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)

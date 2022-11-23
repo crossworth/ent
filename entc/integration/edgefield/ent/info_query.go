@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -547,7 +548,8 @@ func (igb *InfoGroupBy) Scan(ctx context.Context, v any) error {
 
 func (igb *InfoGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range igb.fields {
-		if !info.ValidColumn(f) {
+		n, _ := strconv.ParseInt(f, 10, 32)
+		if !info.ValidColumn(f) && n < 1 {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -573,6 +575,10 @@ func (igb *InfoGroupBy) sqlQuery() *sql.Selector {
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(igb.fields)+len(igb.fns))
 		for _, f := range igb.fields {
+			_, err := strconv.ParseInt(f, 10, 32)
+			if err == nil {
+				continue
+			}
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
