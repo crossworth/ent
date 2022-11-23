@@ -333,6 +333,16 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []any{"foo"},
 		},
 		{
+			input:     Dialect(dialect.SQLite).Update("users").Set("name", "foo").Returning("id", "name").OrderBy("1 DESC").Limit(10),
+			wantQuery: "UPDATE `users` SET `name` = ? RETURNING `id`, `name` ORDER BY 1 DESC LIMIT 10",
+			wantArgs:  []any{"foo"},
+		},
+		{
+			input:     Dialect(dialect.SQLite).Update("users").Set("name", "foo").Returning("id", "name").OrderBy("1 ASC").Limit(10),
+			wantQuery: "UPDATE `users` SET `name` = ? RETURNING `id`, `name` ORDER BY 1 ASC LIMIT 10",
+			wantArgs:  []any{"foo"},
+		},
+		{
 			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Set("age", 10),
 			wantQuery: `UPDATE "users" SET "name" = $1, "age" = $2`,
 			wantArgs:  []any{"foo", 10},
