@@ -1308,6 +1308,35 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Equal(v4[2].Owner, "bar")
 	require.Equal(v4[3].Name, "d")
 	require.Equal(v4[3].Owner, "bar")
+
+	t.Log("group-by field position")
+	var v5 []struct {
+		Day   string `json:"day"`
+		Count int    `json:"count"`
+	}
+
+	d1 := time.Date(2022, 11, 23, 10, 20, 30, 0, time.UTC)
+	d2 := time.Date(2022, 11, 22, 10, 20, 30, 0, time.UTC)
+	client.Task.Create().SetCreatedAt(d1).SetPriority(enttask.DefaultPriority).SaveX(ctx)
+	client.Task.Create().SetCreatedAt(d1.Add(10 * time.Minute)).SetPriority(enttask.DefaultPriority).SaveX(ctx)
+	client.Task.Create().SetCreatedAt(d2).SetPriority(enttask.DefaultPriority).SaveX(ctx)
+	client.Task.Create().SetCreatedAt(d2.Add(20 * time.Minute)).SetPriority(enttask.DefaultPriority).SaveX(ctx)
+	client.Task.Create().SetCreatedAt(d2.Add(30 * time.Minute)).SetPriority(enttask.DefaultPriority).SaveX(ctx)
+
+	client.Debug().Task.Query().Order(ent.Desc("2")).GroupBy("1").Aggregate(func(selector *sql.Selector) string {
+		if selector.Dialect() == dialect.Postgres {
+			return "date_trunc('day', " + enttask.FieldCreatedAt + ") AS day"
+		}
+		if selector.Dialect() == dialect.MySQL {
+			return "date(" + enttask.FieldCreatedAt + ") AS day"
+		}
+		return `strftime("%Y-%m-%d", ` + enttask.FieldCreatedAt + `) AS day`
+	}, ent.Count()).ScanX(ctx, &v5)
+	require.Len(v5, 2)
+	require.Equal("2022-11-22", v5[0].Day[:10])
+	require.Equal(3, v5[0].Count)
+	require.Equal("2022-11-23", v5[1].Day[:10])
+	require.Equal(2, v5[1].Count)
 }
 
 func ClearFields(t *testing.T, client *ent.Client) {
